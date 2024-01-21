@@ -26,10 +26,7 @@ app.use("/category", categoryRoute);
 const userRoute = require("./routes/UsersRoutes");
 app.use("/user", userRoute);
 
-const userInfoRoute = require("./routes/UserInformationoutes");
-app.use("/userInformation", userInfoRoute);
-
-const productRoute = require("./routes/UsersRoutes");
+const productRoute = require("./routes/ProductRoutes");
 app.use("/product", productRoute);
 
 const billRoute = require("./routes/BillRoutes");

@@ -5,6 +5,7 @@ const {
     addBill,
   getAllBills,
   getBillById,
+  getBillByEmail,
   updateBillById,
   cancelOrder,
   }= require("../controllers/BillController")
@@ -12,6 +13,7 @@ const {
   router.post("/addBill", addBill);
   router.get("/getAllBills", getAllBills);
   router.get("/getBillById/:id", getBillById);
+  router.get("/getBillByEmail/:email", getBillByEmail);
   router.put("/updateBillById/:id", updateBillById);
-  router.put("/cancelOrder", cancelOrder);
+  router.put("/cancelOrder/:id", cancelOrder);
   module.exports = router;

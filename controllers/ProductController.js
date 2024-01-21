@@ -11,7 +11,7 @@ const addProduct = async (req, res) => {
       discountPrice: req.body.discountPrice,
       quantity: req.body.quantity,
       category: req.body.category,
-      user_id: req.body.user_id,
+      user_email: req.body.user_email,
     });
 
     const savedProduct = await product.save(); 
@@ -30,14 +30,22 @@ const addProduct = async (req, res) => {
 };
 
 const getAllProduct = async (req, res) => {
-    try {
-      const data = await Product.find({});
-      res.send(data);
-    } catch (err) {
-      console.error(err);
-      res.status(500).send('Internal Server Error');
-    }
+  try {
+    const data = await Product.find({});
+    const modifiedData = data.map(product => {
+      return {
+        ...product._doc,
+        showDiscount: (product.discountPrice && product.discountPrice !== 0),
+        soldOut: (product.quantity === 0)
+      };
+    });
+    res.send(modifiedData);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
   }
+}
+
 
   const getProductByName = async (req, res) => {
     try {
@@ -59,10 +67,10 @@ const getAllProduct = async (req, res) => {
     }
   };
 
-  const getPoductByVendorName = async (req, res) => {
+  const getPoductByVendorEmail= async (req, res) => {
     try {
-      const vendorName = req.params.vendorName;
-      const products = await Product.find({ vendorName: vendorName });
+      const email = req.params.email;
+      const products = await Product.find({  user_email: email });
       res.json(products);
     } catch (error) {
       res.status(500).json({ message: error.message });
@@ -176,11 +184,12 @@ const deleteProductById= async (req, res) => {
     });
   }
 };
+
   module.exports = {
     addProduct,
     getAllProduct,
     getProductByName,
-    getPoductByVendorName,
+    getPoductByVendorEmail,
     getProductByCategory,
     getProductById,
     deleteProductByName,

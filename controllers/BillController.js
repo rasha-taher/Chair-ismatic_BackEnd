@@ -4,32 +4,35 @@ const addBill = async (req, res) => {
   try {
     const bill = new Bill({
       totalPrice: req.body.totalPrice,
-      user_id: req.body.user_id,
+      userEmail: req.body.userEmail,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
-      email: req.body.email,
       phoneNumber: req.body.discountPrice,
       country: req.body.country,
       city: req.body.city,
       streetAddress: req.body.streetAddress,
       postalCode: req.body.postalCode,
       date: req.body.date,
+      status: req.body.status,
+      paymentMethod : req.body.paymentMethod,
+      productsInCart: req.body.productsInCart,
     });
 
     const savedBill = await bill.save();
     res.status(200).json({
       code: 200,
-      message: "bill added successfully",
+      message: "Bill added successfully",
       data: savedBill,
     });
   } catch (error) {
     res.status(400).json({
       code: 400,
-      message: "bill was not added successfully",
+      message: "Bill was not added successfully",
       error: error.message,
     });
   }
 };
+
 const getAllBills = async (req, res) => {
   try {
     const data = await Bill.find({});
@@ -44,6 +47,15 @@ const getBillById = async (req, res) => {
   try {
     const id = req.params.id;
     const bills = await Bill.find({ _id: id });
+    res.json(bills);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+const getBillByEmail = async (req, res) => {
+  try {
+    const email = req.params.email;
+    const bills = await Bill.find({ userEmail: email });
     res.json(bills);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -77,31 +89,28 @@ const updateBillById = async (req, res) => {
       success: false,
       message: "Error occurred while updating the bill",
       error: error.message,
-    });
+    }); 
   }
 };
 
 async function cancelOrder(id) {
   try {
-    const upadtedBill = await Bill.findByIdAndUpdate(
-      id,
-      { $set: { status: "cancel" } },
+    const upadtedBill = await Bill.findOneAndUpdate(
+      { _id: id },
+      { $set: { status: "Canceled" } },
       { new: true }
     );
-
-    if (!upadtedBill) {
-      throw new Error("Order record not found");
-    }
 
     return upadtedBill;
   } catch (error) {
     throw new Error(`Failed to update order status: ${error.message}`);
   }
-}
+} 
 module.exports = {
   addBill,
   getAllBills,
   getBillById,
+  getBillByEmail,
   updateBillById,
   cancelOrder,
-};
+}; 
