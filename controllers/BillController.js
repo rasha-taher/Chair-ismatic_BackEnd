@@ -1,4 +1,6 @@
 const Bill = require("../models/Bill");
+const mongoose = require('mongoose');
+
 
 const addBill = async (req, res) => {
   try {
@@ -91,23 +93,39 @@ const updateBillById = async (req, res) => {
       error: error.message,
     }); 
   }
-};
+}; 
 
-async function cancelOrder(id) {
+const cancelOrder = async (orderId, res) => {
   try {
-    const upadtedBill = await Bill.findOneAndUpdate(
-      { _id: id },
-      { $set: { status: "Canceled" } },
-      { new: true }
-    );
+    // Check if orderId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+      console.log(`Invalid orderId: ${orderId}`);
+      return res.status(400).json({ error: 'Invalid orderId' });
+    }
 
-    return upadtedBill;
+    // Find the order by ID
+    const order = await Bill.findById(orderId);
+
+    if (!order) {
+      console.log(`Order with ID ${orderId} not found.`);
+      return res.status(404).json({ error: `Order with ID ${orderId} not found.` });
+    }
+
+    // Update the status to "Canceled"
+    order.status = 'Canceled';
+
+    // Save the updated order
+    await order.save();
+
+    console.log(`Order with ID ${orderId} has been canceled.`);
+    return res.status(200).json({ message: `Order with ID ${orderId} has been canceled.` });
   } catch (error) {
-    throw new Error(`Failed to update order status: ${error.message}`);
+    console.error('Error canceling order:', error.message);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
-} 
+};
 module.exports = {
-  addBill,
+  addBill, 
   getAllBills,
   getBillById,
   getBillByEmail,

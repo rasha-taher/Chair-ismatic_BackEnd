@@ -34,7 +34,7 @@ router.delete("/deleteUserByEmail/:email", deleteUserByEmail);
 router.get("/getUserByEmail/:email", getUserByEmail);
 router.get("/getPasswordByEmail/:email", getPasswordByEmail);
 router.put("/updateUserById/:id", updateUserById);
-router.put("/updateUserByEmail/:email", updateUserByEmail);
+router.put("/updateUserByEmail", updateUserByEmail);
 router.put("/updatePassword", updatePasswordByEmail);
 router.post('/admin/login', adminLogin);
 router.post('/vendor/login', vendorLogin);

@@ -15,5 +15,9 @@ const {
   router.get("/getBillById/:id", getBillById);
   router.get("/getBillByEmail/:email", getBillByEmail);
   router.put("/updateBillById/:id", updateBillById);
-  router.put("/cancelOrder/:id", cancelOrder);
+  router.put("/cancelOrder/:id", async (req, res) => {
+    const orderId = req.params.id;
+    await cancelOrder(orderId, res);
+  });
+  
   module.exports = router;

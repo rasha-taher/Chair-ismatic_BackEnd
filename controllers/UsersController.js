@@ -303,27 +303,45 @@ const getPasswordByEmail = async (email) => {
   }
 };
 
-const updatePasswordByEmail = async (email, newPassword) => {
+async function updatePasswordByEmail(req, res) {
   try {
-    // You can adjust the number of salt rounds based on your security requirements
+    const { email, oldPassword, newPassword, confirmPassword } = req.body;
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if the old password matches
+    const isPasswordValid = await bcrypt.compare(oldPassword, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: 'Invalid old password' });
+    }
+
+    // Check if the new password and confirm password match
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: 'New password and confirm password do not match' });
+    }
+
+    // Hash the new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    const updatedUser = await User.findOneAndUpdate(
-      { email },
-      { $set: { password: hashedPassword } },
-      { new: true }
-    );
+    // Update the user's password
+    user.password = hashedPassword;
 
-    if (updatedUser) {
-      return updatedUser;
-    } else {
-      return null; // User not found
-    }
+    // Save the updated user
+    await user.save();
+
+    return res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
-    console.error("Error updating password:", error);
-    throw error;
+    console.error('Error updating password:', error.message);
+    return res.status(500).json({ message: 'Internal server error' });
   }
-};
+}
+
 const deleteUserByEmail = async (req, res) => {
   try {
     const { email } = req.params;
