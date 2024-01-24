@@ -6,7 +6,12 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const PORT = 8080;
 app.use(express.json());
-app.use(cors());
+const corsOptions ={
+  origin:'http://localhost:3000', 
+  credentials:true,            //access-control-allow-credentials:true
+  optionSuccessStatus:200
+}
+app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -45,7 +50,7 @@ const io = require("socket.io")(8900, {
   },
 });
 
-let users = [];
+let users = []; 
  
 const addUser = (userEmail, socketId) => {
   !users.some((user) => user.email === userEmail) &&
@@ -56,8 +61,9 @@ const removeUser = (socketId) => {
 };
 
 const getUser = (userEmail) => {
-  return users.find((user) => user.email === userEmail);
-}; 
+  return users.find((user) => user.email === userEmail) || null;
+};
+ 
 
 io.on("connection", (socket) => {
   //when ceonnect
@@ -72,16 +78,21 @@ io.on("connection", (socket) => {
   //send and get message
   socket.on("sendMessage", ({ senderEmail, receiverEmail, text }) => {
     const user = getUser(receiverEmail);
-    io.to(user.socketId).emit("getMessage", {
-      senderEmail,
-      text,
-    }); 
+  
+    if (user) {
+      io.to(user.socketId).emit("getMessage", {
+        senderEmail,
+        text,
+      });
+    } else {
+      console.log(`User with email ${receiverEmail} not found.`);
+      // Handle the case where the user is not found (e.g., notify the sender)
+    }
   });
-
   //when disconnect
   socket.on("disconnect", () => {
     console.log("a user disconnected!");
-    removeUser(socket.id);
+    removeUser(socket.id); 
     io.emit("getUsers", users);
   });
 });
