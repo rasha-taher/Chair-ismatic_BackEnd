@@ -2,8 +2,10 @@ const Conversation = require("../models/Conversation");
 
 
 const newConversation = async (req, res) => {
+  const { senderEmail, receiverEmail } = req.body; 
+
   const newConversation = new Conversation({
-    members: [req.body.senderEmail, req.body.receiverEmail],
+    members: [senderEmail, receiverEmail],
   });
 
   try {
@@ -13,6 +15,7 @@ const newConversation = async (req, res) => {
     res.status(500).json(err);
   }
 };
+
 
 
 const getConversationOfUser =  async (req, res) => {
